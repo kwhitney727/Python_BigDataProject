@@ -1,0 +1,6 @@
+Digital version prepared using ARC/INFO 7.0.4 running
+under Solaris CDE 1.0.2 on a UNIX worksatation. State
+and County boundaries modified from U.S. Geological 
+Survey digital line graphs. Coastline and Drainage
+modified from Digtial Chart of the World (1993), 
+Environmental Systems Research Institute, Inc..

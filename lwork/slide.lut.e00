@@ -1,0 +1,13 @@
+EXP  0 /LAND/DD/SLIDE.LUT.E00                                                   
+IFO  2
+SLIDE2.LUT                           2   2  16         6
+SLIDE-ATT        12-1   14-1  12-1 20-1  -1  -1-1                   1-
+SYMBOL            3-1  134-1   3-1 30-1  -1  -1-1                   2-
+COMBO-HIGH   55
+INC-HIGH     58
+INC-LOW      66
+INC-MOD      63
+SUS-HIGH     68
+SUS-MOD      84
+EOI
+EOS

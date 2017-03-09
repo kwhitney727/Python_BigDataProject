@@ -1,0 +1,312 @@
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+/*
+/* PLEASE see the associated README.txt and Open-File report before using these
+/* coverages and running this aml.
+/*
+/* landslide.aml
+/*
+/* A modified version of this aml was used to plot Open-File 97-289 "Digital 
+/* Compilation of Landslide Overview Map of the Conterminous United States".
+/*
+/* coded by Jonathan Godt USGS
+/* final coding 9/1/97
+/*
+/* calls	scalev.aml
+/*		scalemi.aml
+/*              scalebar.aml
+/*    
+/* coverages    slide                lookup tables  slide.lut
+/*              hydro                linesets       inkcolor.lin
+/*              county               shadeset       inkcolor.shd
+/*              coast                projection     dd-albers.prj
+/*
+/* This aml takes the ARC/INFO export files, coastdd.e00, hydrodd.e00, 
+/* slidedd.e00, countydd.e00 and converts them to ARC/INFO coverages, projects
+/* them into Albers Equal Area and plots "Digital Compilation of Landslide
+/* Overview Map of the Conterminous United States". 
+/*
+/* The linesets and shadeset files must be loaded into the users system 
+/* for this aml to run. All other files should be placed in the same directory. If
+/* user wishes to IMPORT the files from the command line, comment out the first
+/* several lines begining with import.
+/*
+/* scalev.aml, scalemi.aml, and scalebar.aml should also be placed in the same
+/* directory as this aml calls them to draw the scalebars. 
+/*
+/* Reference: Godt, Jonathan W., 1997, Digital Complitation of "Landslide Overview 
+/* Map of the Conterminous United States" By Dorothy Radbruch-Hall and others.
+/* U.S. Geological Survery Open-File Report 97-289. 3 p. 1 plate.
+/*
+/* contact: Jonathan Godt
+/*          U.S. Geological Survey
+/*          National Landslide Information Center
+/*          (303) 273-8626 
+/*          jgodt@usgs.gov
+/*          http://geohazards.cr.usgs.gov/landslide.html
+/*
+/* note:  These are very large files, approximately 120 mebegabytes in .e00 files
+/*        alone. Thus the IMPORTS, PROJECTs and BUILDs require a fair amount of procesing
+/*        time and disk space.
+/*
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+/* import the coverages and lookup table
+
+   import cover coastdd.e00 coastdd
+   import cover hydrodd.e00 hydrodd
+   import cover slidedd.e00 slidedd
+   import cover countydd.e00 countydd
+   import info slide.lut.e00 slide.lut
+   
+
+/* project the dd coverages into albers
+
+   project cover coastdd coast dd-albers.prj
+   project cover hydrodd hydro dd-albers.prj
+   project cover slidedd slide dd-albers.prj
+   project cover countydd county dd-albers.prj
+
+/* build the new coverages
+
+   build coast
+   build hydro
+   build slide
+   build county
+
+
+/* map composition
+
+arcplot
+
+   mape slide
+
+   disp 1040 
+   slide.gra
+
+       &if [exists slide.map -dir] &then killmap slide.map
+
+/* map slide.map
+/* clean the slate
+
+   markerdelete all
+   linedelete all
+   shadedelete all
+
+/* layout
+
+   pagesize 50 35
+   linesize 0.01
+   linecolor 1
+   box 0 0 50 35
+   maplimit 0 0 50 35
+   mappo  cen 25 18
+   mapunits meters
+   mapscale 3750000
+
+/* shadesets and linesets used to plot map
+
+   shadeset inkcolor
+   lineset inkcolor
+   linesymbol 10
+
+/*draw the polys that are not water (islands)
+
+      clearselect hydro poly
+      reselect hydro poly DNPYTYPE = 9
+   
+   shadesymbol 66
+   polygonshades hydro 1000
+
+/* draw the landslide polys
+
+   shadeset inkcolor
+   lineset inkcolor
+   linesymbol 10
+   polygonshades slide SLIDE-ATT SLIDE.LUT
+
+/* draws the borders of slide polys
+
+      reselect slide arc POLNTYPE = 77
+   
+   arclines slide 1000
+
+/*draw the drainage
+
+   shadesymbol 12
+   linesymbol 22
+
+/* draw the inland waterways
+
+      clearselect hydro poly
+      reselect hydro poly DNPYTYPE = 1
+   
+   polygonshades hydro 1000
+
+/* draw the non-perennial H2O 
+
+   shadesymbol 1
+      
+      clearselect hydro poly
+      reselect hydro poly  DNPYTYPE = 2
+      aselect hydro poly DNPYTYPE = 4
+   
+   polygonshades hydro 1000
+   
+      clearselect hydro poly
+      reselect hydro poly  DNPYTYPE = 2
+   
+   shadetype randomdots
+   shadecolor paleturquoise 1
+   shadesize 0.01
+   shadesep 0.01
+   polygonshades hydro 1000
+
+   shadeset inkcolor
+
+/* draw the perennial rivers
+ 
+       reselect hydro arc DNLNTYPE = 1
+       reselect hydro arc DNLNSTAT = 1
+    
+    arclines hydro 1000
+
+/* draw the inland water boundaries
+
+      clearselect hydro arc
+      reselect hydro arc DNLNTYPE = 2
+      aselect hydro arc DNLNTYPE = 5
+   
+   arclines hydro 1000
+
+
+/* draw the coastlines and state boundaries
+
+
+   lineset inkcolor
+
+      reselect coast arc POLNTYPE = 4
+
+   linesymbol 30
+   arclines coast 1000
+
+      clearselect
+      reselect coast arc POLNTYPE = 1
+
+   linesymbol 40
+   arclines coast 1000
+
+      clearselect
+      reselect coast arc POLNTYPE = 10
+
+   linesymbol 22
+   arclines coast 1000
+
+/* draw the county boundaries
+
+   lineset inkcolor
+   linesymbol 110
+   arclines county 1000
+
+
+
+/* key
+
+   lineset inkcolor
+   shadeset inkcolor
+   linesymbol 10
+   shadesymbol 1
+   textoffset 0 0 
+
+   patch 2 2 9 11 outline
+   textset font
+   textsymbol 24
+   textsize 16 pt
+
+   keybox 0.5 0.25
+   keyarea 3.15 7 9 9.5
+   keyshade slide1.key
+
+   keyarea 3.15 4.0 9 6.75
+   keyshade slide2.key
+
+   textsize 18 pt
+   move 5.5 10.5
+   text 'EXPLANATION' LC
+   textsize 16 pt
+   move 5.5 9.75
+   text 'LANDSLIDE INCIDENCE' LC
+   move 5.5 7.0
+   text 'LANDSLIDE SUSCEPTIBILITY/INCIDENCE' LC
+
+   textsize 14 pt
+   move 2.75 2.65 
+   textfile slide.txt block
+
+   textsize 33 pt
+   move 22 32
+   text 'DIGITAL COMPILATION OF "LANDSLIDE OVERVIEW MAP OF THE CONTERMINOUS UNITED STATES"' LL
+
+   textoffset 0 0 
+   shadesymbol 1
+   patch 12 2 19 6 
+   textsize 18 pt
+   move 15.5 5.6
+   text 'BY' LC
+   move 15.5 5.25
+   text 'DOROTHY H. RADBRUCH-HALL, ROGER B. COLTON, WILLIAM E. DAVIES,' LC
+   move 15.5 5.0
+   text 'IVO LUCCHITTA, BETTY A. SKIPP, AND DAVID J. VARNES' LC
+   move 15.5 4.7
+   text '1982' LC
+
+   move 15.5 3.7
+   text 'Digital compilation by Jonathan W. Godt' LC
+   move 15.5 3.4
+   text '1997' LC
+
+
+   move 15.5 2.25
+   textsize 20 pt
+   text 'National Landslide Information Center' LC
+   move 15.5 2.0
+   text 'USGS, Geologic Hazards Team, Golden, Colorado' LC
+
+   textsize 14 pt
+   move 15.5 3.65
+
+
+   textsymbol 22
+   textcolor 1
+   textsize 9 pt
+   textjustification UL
+   move 2.0 1.85
+   textfile disclaim2.txt block
+   textjustification UR
+   move 9.0 1.85
+   textfile disclaim.txt block
+   textjustification UL
+   move 46.0 1.85
+   textfile forsale.txt block
+
+   textsize 12 pt
+   move 0.25 34.5
+   text 'U.S. DEPARTMENT OF THE INTERIOR\U.S. GEOLOGICAL SURVEY' LL
+
+
+   move 49.75 34.5
+   text 'OPEN-FILE REPORT  97-289' LR
+
+/*scalebars
+
+       &run scalev.aml
+       &run scalemi.aml
+
+   quit
+
+       draw slide 9999 3
+
+   &return
+
+

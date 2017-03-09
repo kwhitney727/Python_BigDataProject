@@ -1,0 +1,184 @@
+/*          SCALBAR.AML
+/*
+/*          Program SCALBAR plots multiple scalebars (km, mi, m, ft, cm, or in).
+/*          PAGEUNITS can only be INCHES at present.
+/*          There is room for multiple lines of text, such as the scale
+/*          and projection information.
+/*
+/*          Initial coding 08/26/92  by A. C. Tarr
+/*          Revised 10/26/93 by A. C. Tarr
+/*
+&S k = %.shnum%
+&IF [VALUE .sb%k%sw] = .FALSE. &THEN &RETURN
+/*
+/*          SCALEBAR LOOP
+/*
+&DO J = 1 &TO [VALUE .nsb%k%]
+  &IF [VALUE .sb%k%-%j%sw] = .FALSE. &THEN
+    &GOTO BOTTOMSB
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = 'SPLIT' &THEN
+    &DO
+      &S sign = 1.
+      &S mult = 2.
+      &S i0 = 0
+    &END
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = 'BAR' &THEN
+    &DO
+      &S sign = 1.
+      &S mult = 2.
+      &S i0 = 0
+    &END
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = 'RAKE UP' &THEN
+    &DO
+      &S sign = 1.
+      &S mult = 1.
+      &S i0 = 1
+    &END
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = 'RAKE DOWN' &THEN
+    &DO
+      &S sign = -1.
+      &S mult = 1.
+      &S i0 = 1
+    &END
+  &S .sbscale = [VALUE .sb%k%-%j%scale]
+  &IF [VALUE .sb%k%-%j%unit] EQ 'MI' &THEN
+    &S scalfactor = 63360. / %.sbscale%
+  &IF [VALUE .sb%k%-%j%unit] EQ 'KM' &THEN
+    &S scalfactor = 39370. / %.sbscale%
+  &IF [VALUE .sb%k%-%j%unit] EQ 'FT' &THEN
+    &S scalfactor = 12. / %.sbscale%
+  &IF [VALUE .sb%k%-%j%unit] EQ 'M' &THEN
+    &S scalfactor = 39.370 / %.sbscale%
+  &IF [VALUE .sb%k%-%j%unit] EQ 'CM' &THEN
+    &S scalfactor = .39370 / %.sbscale%
+  &IF [VALUE .sb%k%-%j%unit] EQ 'IN' &THEN
+    &S scalfactor = 1.0 / %.sbscale%
+  &IF [NULL .SBLINSET] &THEN
+    &S .SBLINSET = %.DEFLINSET%
+  &IF [NULL .SBTXTSET] &THEN
+    &S .SBTXTSET = %.DEFTXTSET%
+  LINESET [VALUE .sb%k%-%j%linset]
+  LINESYMBOL [VALUE .sb%k%-%j%linsym]
+  TEXTSET [VALUE .sb%k%-%j%labset]
+  TEXTSYMBOL [VALUE .sb%k%-%j%labsym]
+  TEXTSIZE [VALUE .sb%k%-%j%labsz] [VALUE .sb%k%-%j%lpt]
+  &S SBDX = [VALUE .sb%k%-%j%divint] * %scalfactor%
+  &S SBDX5 = %sbdx% / 5
+  &S SBLEN = %sbdx% * [VALUE .nsb%k%-%j%div]
+  &S SBDY = [VALUE .sb%k%-%j%thk]
+  &S SBDY2 = %SBDY% / 2.
+  &S X0 = [VALUE .sb%k%-%j%xor] + ( ( %I0% - 1 ) * %SBLEN% / 2 )
+  &S Y0 = [VALUE .sb%k%-%j%yor]
+  &S X1 = %X0% + %SBLEN%
+  &S Y1 = %Y0% + ( %sign% * %SBDY% )
+  LINE %X0% %Y0% %X1% %Y0%
+/*
+/*               VERTICAL DIVISIONS, FIRST BAR
+/*
+  &DO I = 0 &TO 5
+    &S X = %X0% + %I% * %SBDX5%
+    &S YT = %Y0% + ( %sign% * %mult% * %SBDY2% )
+    LINE %X% %Y0% %X% %YT%
+  &END
+/*
+/*               VERTICAL DIVISIONS, REMAINING BARS
+/*
+  &DO I = 0 &TO [CALC [VALUE .nsb%k%-%j%div]]
+    &S X = %X0% + %I% * %SBDX%
+    &IF [VALUE .sb%k%-%j%lpt] EQ 'PT' &THEN
+      &S YT = %Y1% + ( %sign% * [VALUE .sb%k%-%j%labsz] / 72. )
+    &ELSE
+      &S YT = %Y1% + ( %sign% * [VALUE .sb%k%-%j%labsz] )
+    LINE %X% %Y0% %X% %Y1%
+    &S SBVAL = ( %I% + %I0% - 1 ) * [CALC [VALUE .sb%k%-%j%divint]]
+    MOVE %X% %YT%
+    &IF %I% EQ [CALC [VALUE .nsb%k%-%j%div]] &THEN
+      &DO
+        &S UNITLABL = [ABS %SBVAL%] [VALUE .sb%k%-%j%labl]
+        &S UNITLABL = [QUOTE [UNQUOTE   %UNITLABL%]]
+        TEXT %UNITLABL% CL
+      &END
+    &ELSE
+      TEXT [ABS %SBVAL%] CC
+  &END
+/*
+/*               HORIZONTAL DIVISIONS, FIRST BAR
+/*
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = SPLIT &THEN
+  &DO
+  LINE %X0% %Y1% %X1% %Y1%
+  &DO I = 0 &TO 5 &BY 2
+    &IF %I% NE 5 &THEN
+      &DO
+        &S X = %X0% + %I% * %SBDX5%
+        &S X2 = %X% + %SBDX5%
+        &S Y = %Y0% + %SBDY2%
+        LINE %X% %Y% %X2% %Y%
+      &END
+  &END
+/*
+/*               HORIZONTAL DIVISIONS, REMAINING BARS
+/*
+  &DO I = 2 &TO [CALC [VALUE .nsb%k%-%j%div]] &BY 2
+    &IF %I% NE [CALC [VALUE .nsb%k%-%j%div]] &THEN
+      &DO
+        &S X = %X0% + %I% * %sbdx%
+        &S X2 = %X% + %SBDX%
+        &S Y = %Y0% + %SBDY2%
+        LINE %X% %Y% %X2% %Y%
+      &END
+  &END
+  &END
+/*
+/*               BARS, FIRST SECTION
+/*
+  &IF [QUOTE [VALUE .sb%k%-%j%type]] = BAR &THEN
+  &DO
+  LINE %X0% %Y1% %X1% %Y1%
+  SHADESET color.shd
+  SHADESYMBOL 1
+  &DO I = 0 &TO 5 &BY 2
+    &IF %I% NE 5 &THEN
+      &DO
+        &S X = %X0% + %I% * %SBDX5%
+        &S X2 = %X% + %SBDX5%
+        PATCH %X% %Y0% %X2% %Y1%
+      &END
+  &END
+/*
+/*               BARS, REMAINING SECTIONS
+/*
+  &DO I = 2 &TO [CALC [VALUE .nsb%k%-%j%div]] &BY 2
+    &IF %I% NE [CALC [VALUE .nsb%k%-%j%div]] &THEN
+      &DO
+        &S X = %X0% + %I% * %sbdx%
+        &S X2 = %X% + %SBDX%
+        PATCH %X% %Y0% %X2% %Y1%
+      &END
+  &END
+  &END
+/*
+&LABEL BOTTOMSB
+&END
+/*
+/*          TEXT LINES LOOP
+/*
+&DO J = 1 &TO [VALUE .nsbtxt%k%]
+  &IF [VALUE .sb%k%-%j%txtsw] = .FALSE. &THEN
+    &GOTO BOTTOMTXT
+  &S X = [VALUE .sb%k%-%j%txtxor]
+  &S Y = [VALUE .sb%k%-%j%txtyor]
+  MOVE %X% %Y%
+  TEXTSET [VALUE .sb%k%-%j%txtset]
+  TEXTSYMBOL [VALUE .sb%k%-%j%txtsym]
+  TEXTSIZE [VALUE .sb%k%-%j%txtsz] [VALUE .sb%k%-%j%tpt]
+  TEXT [VALUE .sb%k%-%j%txt] [VALUE .sb%k%-%j%txtpos]
+&LABEL BOTTOMTXT
+&END
+/*
+LINEDELETE ALL
+TEXTDELETE ALL
+LINESET %.DEFLINSET%
+TEXTSET %.DEFTXTSET%
+/*
+&RETURN

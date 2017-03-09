@@ -1,0 +1,47 @@
+/* passes values to scalebar.aml
+/* 5/9/97
+/* J. Godt
+
+&S .shnum = 1
+&S .sb1sw = .TRUE.
+&S .nsb1 = 1
+&S .sb1-1sw = .TRUE.
+&S .sb1-1type = SPLIT
+&S .sb1-1scale = 3750000
+&S .sb1-1pos = CC
+&S .sb1-1aml = SCALBAR
+&S .sb1-1unit = KM
+&S .sb1-1linsym = 10
+&S .sb1-1linset = inkcolor.lin
+&S .sb1-1labset = font.txt
+&S .sb1-1labl = KM
+&S .sb1-1labsym = 18
+&S .nsb1-1div = 6
+&S .sb1-1lpt = #
+&S .sb1-1divint = 150
+&S .sb1-1labsz = 0.10
+&S .sb1-1xor =  32.0
+&S .sb1-1yor = 2.5
+&S .sb1-1thk = 0.05
+&S .nsbtxt1 = 2
+&S .sb1-1txtsw = .TRUE.
+&S .sb1-1txt = 'Scale = 1:3,750,000'
+&S .sb1-1txtpos = CC
+&S .sb1-1txtsym = 18
+&S .sb1-1txtset = font.txt
+&S .sb1-1tpt = 
+&S .sb1-1txtxor = 32.0
+&S .sb1-1txtyor = 3.1
+&S .sb1-1txtsz = 0.10
+&S .sb1-2txtsw = .TRUE.
+&S .sb1-2txt = 'Albers Equal Area Projection'
+&S .sb1-2txtpos = CC
+&S .sb1-2txtsym = 18
+&S .sb1-2txtset = font.txt
+&S .sb1-2tpt = 
+&S .sb1-2txtxor = 32.0
+&S .sb1-2txtyor = 3.3
+&S .sb1-2txtsz = 0.15
+&S .DEFLINSET = inkcolor.lin
+&S .DEFTXTSET = font.txt
+&r /land/lscratch/tool/scalbar.aml

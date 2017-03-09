@@ -1,0 +1,8 @@
+For sale by U.S. Geological Survey Information Services 
+Box 25286, Federal Center, Denver, Colorado 80225. The 
+landslide database can be downloaded via 'annonymous 
+ftp' from a USGS system named greenwood.cr.usgs.gov 
+(136.177.21.122). The files are located in a directory 
+named /pub/open-file-reports/ofr-97-289. The files are 
+available in both SDTS and ARC/INFO Export format.
+
